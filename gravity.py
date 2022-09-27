@@ -15,32 +15,30 @@ class Body:
 
         self.x = random.randint(self.radius, screenx - self.radius)
         self.y = random.randint(self.radius, screeny - self.radius)
-        self.pos = pygame.math.Vector2(400,100)
+        self.pos = pygame.math.Vector2(self.x,self.y)
 
         self.vel = pygame.math.Vector2(0)
 
-        self.gravity = gravity
+        self.gravity = pygame.math.Vector2(0, gravity)
 
     def move(self, x1, y1, mass1):
-        self.dx = self.pos.x - x1
-        self.dy = self.pos.y - y1
-        self.distance = math.sqrt(self.dx**2 + self.dy**2)
+        attr = pygame.math.Vector2(x1,y1)
 
-        angle = math.atan(self.dx/self.dy)
-        print(angle)
-        force = pygame.math.Vector2(self.gravity*((self.mass*mass1)/(self.distance**2))).rotate_rad(angle)
-        #print(abs(math.atan(force.x/force.y)-angle))
+        self.distance = attr - self.pos
+        self.dir = self.distance.normalize()
+  
+        magn = self.gravity.magnitude()*((self.mass*mass1)/(self.distance.magnitude()**2))
+        force = self.dir*magn
 
         self.acc = force/self.mass
         self.vel += self.acc
 
         self.pos += self.vel
+        self.pos += self.gravity
 
         pygame.draw.circle(window, (0,255,255), (self.pos.x, self.pos.y), self.radius)
 
-        pygame.draw.line(window, (0,255,0), (self.pos.x, self.pos.y), (force.x*5+self.pos.x, force.y*5+self.pos.y))
-
-    def bounce(self, other, screenx, screeny):
+    def bounce(self, radius1, screenx, screeny):
         if self.pos.x - self.radius < 0 or self.pos.x + self.radius > screenx:
             self.vel.x *= -0.5
 
