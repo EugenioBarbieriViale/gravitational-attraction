@@ -20,7 +20,7 @@ class Body:
 
         self.gravity = pygame.math.Vector2(0, gravity)
 
-    def move(self, other):
+    def update(self, other):
         self.distance = other.pos - self.pos
         self.dir = self.distance.normalize()
   
@@ -39,14 +39,16 @@ class Body:
         other.pos -= other.vel
         other.pos -= other.gravity
 
-        pygame.draw.circle(window, self.color, (self.pos.x, self.pos.y), self.radius)
-
     def bounce(self, screenx, screeny):
         if self.pos.x - self.radius < 0 or self.pos.x + self.radius > screenx:
             self.vel.x *= -0.5
 
         if self.pos.y + self.radius > screeny or self.pos.y - self.radius < 0:
             self.vel.y *= -0.5
+
+    def display(self):
+        pygame.draw.circle(window, self.color, (self.pos.x, self.pos.y), self.radius)
+
 
 
 gravity = 1
@@ -77,8 +79,9 @@ while True:
     for j in range(n):
         for i in range(n):
             if j != i:
-                objs[j].move(objs[i])
+                objs[j].update(objs[i])
                 objs[j].bounce(screenx, screeny)
+        objs[j].display()
 
     pygame.display.flip()
     clock.tick(60)
