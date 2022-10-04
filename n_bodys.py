@@ -36,8 +36,7 @@ class Body:
     def collide(self, other):
         dist = self.distance.magnitude()
         if dist <= self.radius or dist <= other.radius:
-            self.vel *= 0
-            other.vel *= 0
+            return True
 
     def display(self):
         pygame.draw.circle(window, self.color, (self.pos.x, self.pos.y), self.radius)
@@ -49,7 +48,7 @@ objs = []
 n = 2
 
 for i in range(n):
-    x = [300, 800]
+    x = random.randint(20, 600)
     y = [300, 300]
 
     mass = [300, 1000]
@@ -59,7 +58,7 @@ for i in range(n):
         color = random.randint(0,255)
         colors.append(color)
 
-    objs.append(Body(x[i], y[i], mass[i], colors, gravity))
+    objs.append(Body(x, y[i], mass[i], colors, gravity))
 
 
 while True:
@@ -70,13 +69,18 @@ while True:
 
     window.fill((0,0,0))
 
-    for j in range(n):
-        for i in range(n):
+    for j in range(len(objs)):
+        for i in range(len(objs)):
             if j != i:
                 objs[j].update(objs[i])
-                objs[j].collide(objs[i])
-
+                
         objs[j].display()
+
+    for j in range(len(objs)):
+        for i in range(len(objs)):
+            if i != j:
+                if objs[j].collide(objs[i]):
+                    objs.remove(objs[i])
 
     pygame.display.flip()
     clock.tick(60)
