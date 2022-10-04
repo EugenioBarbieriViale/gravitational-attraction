@@ -9,22 +9,19 @@ window = pygame.display.set_mode([screenx,screeny])
 pygame.display.set_caption("Gravity simulator")
 
 class Body:
-    def __init__(self, mass, gravity):
+    def __init__(self, x, y, mass, color, gravity):
         self.mass = mass
         self.radius = int((self.mass / 3.14) ** (1/3))
 
-        self.x = random.randint(self.radius, screenx - self.radius)
-        self.y = random.randint(self.radius, screeny - self.radius)
-        self.pos = pygame.math.Vector2(self.x,self.y)
-
+        self.pos = pygame.math.Vector2(x, y)
         self.vel = pygame.math.Vector2(0)
+
+        self.color = color
 
         self.gravity = pygame.math.Vector2(0, gravity)
 
-    def move(self, x1, y1, mass1):
-        attr = pygame.math.Vector2(x1,y1)
-
-        self.distance = attr - self.pos
+    def move(self, atr, mass1):
+        self.distance = atr - self.pos
         self.dir = self.distance.normalize()
   
         magn = self.gravity.magnitude()*((self.mass*mass1)/(self.distance.magnitude()**2))
@@ -36,7 +33,7 @@ class Body:
         self.pos += self.vel
         self.pos += self.gravity
 
-        pygame.draw.circle(window, (0,255,255), (self.pos.x, self.pos.y), self.radius)
+        pygame.draw.circle(window, self.color, (self.pos.x, self.pos.y), self.radius)
 
     def bounce(self, radius1, screenx, screeny):
         if self.pos.x - self.radius < 0 or self.pos.x + self.radius > screenx:
@@ -47,12 +44,23 @@ class Body:
 
 atr_mass = 1000
 atr_radius = 30
-atr_x = screenx/2
-atr_y = screeny/2
+atr = pygame.math.Vector2(screenx/2, screeny/2)
 
 gravity = 1
 
-obj = Body(800, gravity)
+objs = []
+n = 4
+for i in range(n):
+    x = (i+10) * 20
+    y = screeny / 2
+    mass = random.randint(650, 1300)
+    
+    colors = []
+    for j in range(3):
+        color = random.randint(0,255)
+        colors.append(color)
+
+    objs.append(Body(x, y, mass, colors, gravity))
 
 while True:
     for event in pygame.event.get():
@@ -62,10 +70,11 @@ while True:
 
     window.fill((0,0,0))
 
-    obj.move(atr_x, atr_y, atr_mass)
-    obj.bounce(atr_radius, screenx, screeny)
+    for obj in objs:
+        obj.move(atr, atr_mass)
+        obj.bounce(atr_radius, screenx, screeny)
 
-    pygame.draw.circle(window, (255,255,0), (atr_x, atr_y), atr_radius)
+    pygame.draw.circle(window, (255,255,0), (atr.x, atr.y), atr_radius)
 
     pygame.display.flip()
     clock.tick(60)

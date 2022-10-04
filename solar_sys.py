@@ -3,28 +3,29 @@ import pygame, math, sys, random
 pygame.init()
 clock = pygame.time.Clock()
 
-screenx,screeny = 1000,800
+screenx,screeny = 1300,700
 
 window = pygame.display.set_mode([screenx,screeny])
 pygame.display.set_caption("Gravity simulator")
 
 class Body:
-    def __init__(self, x, y, mass, color, gravity):
+    def __init__(self, x, y, mass, color, diameter):
         self.mass = mass
-        self.radius = int((self.mass / 3.14) ** (1/3))
+        self.diameter = diameter
+        self.radius = self.diameter/2
 
         self.pos = pygame.math.Vector2(x, y)
         self.vel = pygame.math.Vector2(0)
 
         self.color = color
 
-        self.gravity = pygame.math.Vector2(0, gravity)
+        self.gravity = pygame.math.Vector2(0, 0)
 
-    def move(self, atr, mass1):
-        self.distance = atr - self.pos
+    def update(self, other):
+        self.distance = other.pos - self.pos
         self.dir = self.distance.normalize()
   
-        magn = self.gravity.magnitude()*((self.mass*mass1)/(self.distance.magnitude()**2))
+        magn = self.gravity.magnitude()*((self.mass*other.mass)/(self.distance.magnitude()**2))
         force = self.dir*magn
 
         self.acc = force/self.mass
@@ -33,34 +34,23 @@ class Body:
         self.pos += self.vel
         self.pos += self.gravity
 
+    def display(self):
         pygame.draw.circle(window, self.color, (self.pos.x, self.pos.y), self.radius)
 
-    def bounce(self, radius1, screenx, screeny):
-        if self.pos.x - self.radius < 0 or self.pos.x + self.radius > screenx:
-            self.vel.x *= -0.5
 
-        if self.pos.y + self.radius > screeny or self.pos.y - self.radius < 0:
-            self.vel.y *= -0.5
+planets = [
+    Body(screenx/2, screeny/2, 2000, (0,255,0), 70), # sun
+    Body(6+screenx+100, screeny/2, 5, (100,255,200), 5), # mercury
+    Body(11+screenx+100, screeny/2, 50, (100,255,200), 12), # venus
+    Body(15+screenx+100, screeny/2, 60, (100,255,200), 12), # earth
+    Body(23+screenx+100, screeny/2, 10, (100,255,200), 6), # mars
+    Body(80+screenx+100, screeny/2, 1000, (100,255,200), 25), # jupiter
+    Body(143+screenx+100, screeny/2, 568, (100,255,200), 22), # saturn
+    Body(288+screenx+100, screeny/2, 90, (100,255,200), 16), # uranus
+    Body(450+screenx+100, screeny/2, 100, (100,255,200), 15) # neptune
+]
 
-atr_mass = 1000
-atr_radius = 30
-atr = pygame.math.Vector2(screenx/2, screeny/2)
-
-gravity = 1
-
-objs = []
-n = 4
-for i in range(n):
-    x = (i+10) * 20
-    y = screeny / 2
-    mass = random.randint(650, 1300)
-    
-    colors = []
-    for j in range(3):
-        color = random.randint(0,255)
-        colors.append(color)
-
-    objs.append(Body(x, y, mass, colors, gravity))
+n = len(planets)
 
 while True:
     for event in pygame.event.get():
@@ -70,11 +60,12 @@ while True:
 
     window.fill((0,0,0))
 
-    for obj in objs:
-        obj.move(atr, atr_mass)
-        obj.bounce(atr_radius, screenx, screeny)
+    for j in range(n):
+        for i in range(n):
+            if j != i:
+                planets[j].update(planets[i])
 
-    pygame.draw.circle(window, (255,255,0), (atr.x, atr.y), atr_radius)
+        planets[j].display()
 
     pygame.display.flip()
     clock.tick(60)
