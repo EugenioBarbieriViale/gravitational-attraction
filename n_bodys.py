@@ -11,7 +11,7 @@ pygame.display.set_caption("Gravity simulator")
 class Body:
     def __init__(self, x, y, mass, color, gravity):
         self.mass = mass
-        self.radius = int(self.mass/100)
+        self.radius = int(mass/100)
 
         self.pos = pygame.math.Vector2(x, y)
         self.vel = pygame.math.Vector2(0)
@@ -25,13 +25,15 @@ class Body:
         self.dir = self.distance.normalize()
   
         magn = self.gravity.magnitude()*((self.mass*other.mass)/(self.distance.magnitude()**2))
-        force = self.dir*magn
+        self.force = self.dir*magn
 
-        self.acc = force/self.mass
+        self.acc = self.force/self.mass
         self.vel += self.acc
 
         self.pos += self.vel
         self.pos += self.gravity
+
+        print(self.vel)
 
     def collide(self, other):
         dist = self.distance.magnitude()
@@ -48,17 +50,17 @@ objs = []
 n = 2
 
 for i in range(n):
-    x = random.randint(20, 600)
-    y = [300, 300]
+    x = random.randint(20, 700)
+    y = random.randint(20, 700)
 
-    mass = [300, 1000]
+    mass = random.randint(600,1000)
     
     colors = []
     for j in range(3):
         color = random.randint(0,255)
         colors.append(color)
 
-    objs.append(Body(x, y[i], mass[i], colors, gravity))
+    objs.append(Body(x, y, mass, colors, gravity))
 
 
 while True:
@@ -73,15 +75,12 @@ while True:
         for i in range(len(objs)):
             if j != i:
                 objs[j].update(objs[i])
+                if objs[j].collide(objs[i]):
+                    sys.exit()
                 
         objs[j].display()
-
-    for j in range(len(objs)):
-        for i in range(len(objs)):
-            if i != j:
-                if objs[j].collide(objs[i]):
-                    objs.remove(objs[i])
 
     pygame.display.flip()
     clock.tick(60)
     pygame.display.update()
+
