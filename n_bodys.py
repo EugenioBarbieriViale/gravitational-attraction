@@ -76,7 +76,8 @@ while True:
             if j != i:
                 objs[j].update(objs[i])
                 if objs[j].collide(objs[i]):
-                    sys.exit()
+                    objs[j].vel *= -1
+                    objs[i].vel *= -1
                 
         objs[j].display()
 
