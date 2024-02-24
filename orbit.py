@@ -11,7 +11,7 @@ pygame.display.set_caption("Gravity simulator")
 
 sun = [screenx//2,screeny//2]
 
-a = 200
+a = 400
 b = 200
 
 e = math.sqrt(a**2 - b**2)/a
